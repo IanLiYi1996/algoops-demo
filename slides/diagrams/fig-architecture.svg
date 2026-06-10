@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0052ff"/>
+    </marker>
+    <style>
+      .lbl{fill:#0a0b0d;font-size:14px;font-weight:600}
+      .sub{fill:#7c828a;font-size:11.5px}
+      .mono{font-family:'JetBrains Mono',monospace}
+      .edge{fill:#5b616e;font-size:11px}
+    </style>
+  </defs>
+
+  <text x="36" y="38" fill="#0a0b0d" font-size="20" font-weight="700">架构 · 浏览器无法直连 AgentCore,前门是 API Gateway</text>
+  <text x="36" y="60" class="sub" font-size="13">AgentCore 端点无 CORS、仅流式;账户禁止公开 Lambda URL → 认证(Cognito JWT)在中转 Lambda 内完成,全程无公开策略</text>
+
+  <!-- Browser -->
+  <rect x="36" y="92" width="220" height="92" rx="14" fill="#0a0b0d"/>
+  <text x="56" y="124" fill="#ffffff" font-size="14" font-weight="600">浏览器 · CloudFront</text>
+  <text x="56" y="146" fill="#a8acb3" font-size="11.5">Cognito Hosted UI 登录拿 JWT</text>
+  <text x="56" y="166" fill="#44e0d6" font-size="11.5" class="mono">静态控制台 (S3 + OAC)</text>
+
+  <!-- API Gateway -->
+  <rect x="380" y="92" width="200" height="92" rx="14" fill="#ffffff" stroke="#dee1e6" stroke-width="1.5"/>
+  <text x="400" y="124" class="lbl">API Gateway</text>
+  <text x="400" y="142" class="sub">HTTP API · 公开可调</text>
+  <text x="400" y="166" class="sub mono">POST /invoke</text>
+
+  <!-- Relay Lambda -->
+  <rect x="380" y="232" width="200" height="92" rx="14" fill="#ffffff" stroke="#dee1e6" stroke-width="1.5"/>
+  <text x="400" y="264" class="lbl">relay Lambda</text>
+  <text x="400" y="284" class="sub">校验 Cognito JWT</text>
+  <text x="400" y="306" class="sub mono">invoke_agent_runtime</text>
+
+  <!-- AgentCore Runtime block -->
+  <rect x="688" y="92" width="236" height="232" rx="16" fill="#f7f7f7" stroke="#0052ff" stroke-width="2"/>
+  <text x="708" y="120" fill="#0052ff" font-size="14" font-weight="700">AgentCore Runtime</text>
+  <text x="708" y="138" class="sub">Strands Agent (ARM64 microVM)</text>
+
+  <rect x="708" y="154" width="196" height="44" rx="10" fill="#ffffff" stroke="#dee1e6"/>
+  <text x="722" y="180" class="lbl" font-size="13">Memory</text>
+  <text x="800" y="180" class="sub">跨会话召回</text>
+
+  <rect x="708" y="206" width="196" height="44" rx="10" fill="#ffffff" stroke="#dee1e6"/>
+  <text x="722" y="232" class="lbl" font-size="13">Code Interpreter</text>
+  <text x="852" y="232" class="sub">真跑</text>
+
+  <rect x="708" y="258" width="196" height="44" rx="10" fill="#ffffff" stroke="#dee1e6"/>
+  <text x="722" y="284" class="lbl" font-size="13">Skills</text>
+  <text x="790" y="284" class="sub">评估方法论</text>
+
+  <!-- edges -->
+  <line x1="256" y1="138" x2="378" y2="138" stroke="#0052ff" stroke-width="2" marker-end="url(#a)"/>
+  <text x="262" y="128" class="edge">Bearer JWT</text>
+  <line x1="480" y1="184" x2="480" y2="230" stroke="#0052ff" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="580" y1="278" x2="686" y2="220" stroke="#0052ff" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- CDK footnote -->
+  <text x="36" y="372" class="sub" font-size="12.5">一个 TypeScript CDK app 起全栈:<tspan fill="#0052ff" font-weight="600">AgentStack</tspan> (Runtime + Memory + Code Interpreter) + <tspan fill="#0052ff" font-weight="600">WebAppStack</tspan> (CloudFront + Cognito + API Gateway + relay Lambda)</text>
+  <text x="36" y="394" class="sub" font-size="12.5">CLI <tspan class="mono">demo.sh</tspan> 走同一个 Runtime 作复刻旁路 · 一条 <tspan class="mono">cdk deploy --all</tspan></text>
+</svg>

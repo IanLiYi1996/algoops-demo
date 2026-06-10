@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="algoops">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AlgoOps · 算法效能智能体 — AgentCore Builder Demo</title>
+<link rel="stylesheet" href="./assets/fonts.css">
+<link rel="stylesheet" href="./assets/base.css">
+<link rel="stylesheet" id="theme-link" href="./assets/themes/algoops.css">
+<link rel="stylesheet" href="./assets/animations/animations.css">
+<style>
+  .fig{display:block;margin:0 auto;max-width:100%;max-height:62vh}
+  .svc-pill{display:inline-block;font-family:var(--font-mono);font-size:13px;color:var(--accent);
+    border:1px solid var(--border);border-radius:100px;padding:4px 12px;margin:3px}
+  .big-num{font-family:var(--font-mono);font-weight:600}
+  code,.mono{font-family:var(--font-mono)}
+</style>
+</head>
+<body data-themes="algoops,corporate-clean,minimal-white,swiss-grid,blueprint" data-theme-base="./assets/themes/">
+<div class="deck">
+
+  <!-- 1 · Cover -->
+  <section class="slide" data-title="Cover">
+    <p class="kicker">Amazon Bedrock AgentCore · Builder Demo</p>
+    <h1 class="h1 anim-fade-up" data-anim="fade-up">AlgoOps<br><span class="accent">算法效能智能体</span></h1>
+    <p class="lede mt-m">让 Agent 以「AI 验证 AI」替团队做内部业务的<b>模型选型</b></p>
+    <p class="dim mt-s mono">按 S 进入演讲者视图 · T 切主题 · ← → 翻页</p>
+    <div class="deck-footer"><span class="dim2">github.com/IanLiYi1996/algoops-demo</span><span class="slide-number" data-current="1" data-total="12"></span></div>
+    <div class="notes">
+      <p>大家好。今天这个 demo 叫 <strong>AlgoOps,算法效能智能体</strong>。</p>
+      <p>它解决一个很具体的工程痛点:团队要给内部的<strong>搜索、推荐、标签</strong>系统选模型,候选模型一堆,每个都说自己指标多漂亮——但我们都知道,<em>离线漂亮、上线翻车</em>太常见了。</p>
+      <p>AlgoOps 的核心理念是「<strong>AI 验证 AI</strong>」:不信宣称指标,让 Agent 在隔离沙箱里<strong>真跑一遍 benchmark</strong>,用实测数字说话。整套东西跑在 Amazon Bedrock AgentCore 上,一条命令起全栈。</p>
+    </div>
+  </section>
+
+  <!-- 2 · Agenda -->
+  <section class="slide" data-title="Agenda">
+    <p class="kicker">Agenda</p>
+    <h2 class="h2">今天看什么</h2>
+    <div class="grid g2 mt-l anim-stagger-list" data-anim-target>
+      <div class="card"><h4>01 · 痛点</h4><p class="dim">离线漂亮、上线翻车 —— 为什么选型这么难</p></div>
+      <div class="card"><h4>02 · 四阶段</h4><p class="dim">调研 → 评估 → 验证 → 沉淀</p></div>
+      <div class="card"><h4>03 · 架构</h4><p class="dim">AgentCore 三服务 + Skills,一条 cdk deploy</p></div>
+      <div class="card"><h4>04 · 现场 demo</h4><p class="dim">真跑 benchmark + 跨会话召回 + 可泛化</p></div>
+    </div>
+  </section>
+
+  <!-- 3 · Pain -->
+  <section class="slide" data-title="Pain">
+    <p class="kicker">The pain</p>
+    <h2 class="h2">"这个模型 Recall@10 有 0.82" —— <span class="accent">真的吗?</span></h2>
+    <div class="grid g3 mt-l anim-stagger-list" data-anim-target>
+      <div class="card"><h4>🤡 离线漂亮上线翻车</h4><p class="dim">宣称指标用的是别人的数据集 / 阈值 / metric 定义,跟我们的语料不是一回事。</p></div>
+      <div class="card"><h4>🎲 评估没方法论</h4><p class="dim">每个人各凭经验评一遍,换个人、换个项目又从零开始。</p></div>
+      <div class="card"><h4>🔁 重复踩坑</h4><p class="dim">上个季度淘汰过的方案,这个季度有人又捡回来评一遍。</p></div>
+    </div>
+    <p class="lede mt-l">AlgoOps:把"评估"做成<b>可复跑、可记忆、可复用</b>的 Agent 工作流。</p>
+  </section>
+
+  <!-- 4 · Four stages (SVG) -->
+  <section class="slide" data-title="Four Stages">
+    <p class="kicker">How it works</p>
+    <h2 class="h2">四阶段协同</h2>
+    <img class="fig mt-m" src="./diagrams/fig-four-stages.svg" alt="调研→评估→验证→沉淀">
+    <div class="notes">
+      <p>AlgoOps 把模型选型拆成四个阶段,每个阶段对应 AgentCore 的一个能力。</p>
+      <p><strong>调研</strong>:取候选模型宣称了什么。<strong>评估</strong>:激活一个 Skill,产出结构化评估卡,标出风险和待验证项。<strong>验证</strong>——这是核心——在 Code Interpreter 沙箱里<strong>真跑</strong> Recall@K、NDCG、F1,拿实测对账宣称。<strong>沉淀</strong>:结论存进 Memory,下次评估先召回,不重复踩坑。</p>
+      <p>注意最后那条虚线回到调研——这是个闭环,记忆让团队越评越聪明。</p>
+    </div>
+  </section>
+
+  <!-- 5 · Architecture (SVG) -->
+  <section class="slide" data-title="Architecture">
+    <p class="kicker">Architecture</p>
+    <h2 class="h2">浏览器无法直连 AgentCore —— 前门是 API Gateway</h2>
+    <img class="fig mt-m" src="./diagrams/fig-architecture.svg" alt="browser → API Gateway → relay → Runtime">
+    <div class="notes">
+      <p>讲一下架构,因为这里有个真实踩过的坑。</p>
+      <p>浏览器<strong>不能</strong>直接调 AgentCore——它的端点没有 CORS、而且只支持流式;另外这个账户的安全策略禁止公开 Lambda URL。所以前门用 <strong>API Gateway</strong>,认证(校验 Cognito 的 JWT)放在中转 Lambda 里做,全程没有任何公开策略,也就不会触发 AppSec 告警。</p>
+      <p>右边就是 Runtime,里面跑 Strands Agent,挂着 Memory、Code Interpreter、Skills 三块能力。一个 TypeScript CDK app 把这一切起起来。</p>
+    </div>
+  </section>
+
+  <!-- 6 · Capability map (SVG) -->
+  <section class="slide" data-title="Capability Map">
+    <p class="kicker">AgentCore capabilities</p>
+    <h2 class="h2">一个能力承担一件事</h2>
+    <img class="fig mt-m" src="./diagrams/fig-capability-map.svg" alt="Runtime / Memory / Code Interpreter / Skills">
+    <p class="tc mt-m">
+      <span class="svc-pill">Runtime</span>
+      <span class="svc-pill">Memory</span>
+      <span class="svc-pill">Code Interpreter</span>
+      <span class="svc-pill">Skills</span>
+    </p>
+  </section>
+
+  <!-- 7 · AI verifies AI (SVG) -->
+  <section class="slide" data-title="AI verifies AI">
+    <p class="kicker">The core idea</p>
+    <h2 class="h2">「AI 验证 AI」</h2>
+    <img class="fig mt-m" src="./diagrams/fig-ai-verifies-ai.svg" alt="claimed vs verified">
+    <div class="notes">
+      <p>这是整个 demo 的灵魂。左边是<strong>宣称</strong>的 Recall@10 = 0.82,来自源材料;我们不信它。</p>
+      <p>AlgoOps 在沙箱里用一个 seeded 合成评估集<strong>真跑一遍</strong>,得到<strong>实测</strong> 0.79——代码和数字一起留痕。结论:宣称在我们的协议下基本成立,差 3.6%,可用。</p>
+      <p>关键是:<em>如果实测远低于宣称,那就是头条预警</em>——这正是"离线漂亮、上线翻车"被当场抓住的时刻。</p>
+    </div>
+  </section>
+
+  <!-- 8 · Demo climax 1 -->
+  <section class="slide" data-title="Demo · Verify">
+    <p class="kicker">现场 demo · 幕一</p>
+    <h2 class="h2">真跑 benchmark 验证宣称</h2>
+    <div class="grid g2 mt-l">
+      <div class="card">
+        <h4>输入</h4>
+        <p class="dim mono">Verify bge-m3's claimed Recall@10 — run the benchmark and show the actual numbers.</p>
+      </div>
+      <div class="card">
+        <h4>Sandbox 实测(真数字)</h4>
+        <p class="mono">activated skill: <span class="accent">benchmark-recsys</span></p>
+        <p class="mono big-num">VERIFIED Recall@10 = 0.7912</p>
+        <p class="mono big-num">VERIFIED NDCG@10 = 0.6840</p>
+        <p class="dim mono">CLAIMED 0.82 vs VERIFIED 0.79 — 基本成立 (−3.6%)</p>
+      </div>
+    </div>
+    <div class="notes"><p>现场点"真跑验证"按钮:Agent 激活 benchmark-recsys skill,在 Code Interpreter 沙箱里跑出真实的 Recall@10 / NDCG@10,当场和宣称对账。注意——这不是口说,是沙箱里真跑出来的数字,代码可见。</p></div>
+  </section>
+
+  <!-- 9 · Demo climax 2 -->
+  <section class="slide" data-title="Demo · Recall">
+    <p class="kicker">现场 demo · 幕二</p>
+    <h2 class="h2">开新会话 —— Agent 却记得历次结论</h2>
+    <div class="card mt-l">
+      <p class="dim mono">Based on your memory, which models have we evaluated for search / rec / tagging?</p>
+      <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:15px">
+        <tr style="color:var(--text-3);text-align:left"><th>Model</th><th>Task</th><th>Verified</th><th>结论</th></tr>
+        <tr><td class="mono">BGE-M3</td><td>search</td><td class="mono">R@10 0.79</td><td style="color:var(--good)">采用</td></tr>
+        <tr><td class="mono">SASRec</td><td>rec</td><td class="mono">NDCG 0.17</td><td style="color:var(--warn)">待复核</td></tr>
+        <tr><td class="mono">BERT-tagger</td><td>tagging</td><td class="mono">F1 0.81</td><td style="color:var(--bad)">否决</td></tr>
+      </table>
+    </div>
+    <p class="lede mt-m">AgentCore Memory(SEMANTIC + SUMMARIZATION)跨会话召回 —— <b>不重复踩坑</b>。</p>
+    <div class="notes"><p>这一幕最有冲击力:我开一个<strong>全新 session</strong>,Agent 却准确回忆出之前评过的三个模型和结论。这就是 Memory 的跨会话召回——团队的选型经验沉淀下来了。</p></div>
+  </section>
+
+  <!-- 10 · Generalization -->
+  <section class="slide" data-title="Generalization">
+    <p class="kicker">Why it matters</p>
+    <h2 class="h2">同一套骨架,换个领域就能用</h2>
+    <div class="grid g2 mt-l">
+      <div class="card"><h4>不变 · 骨架</h4><p class="dim">Runtime + Memory + Code Interpreter + Skills + CDK 全栈 —— 一行不改</p></div>
+      <div class="card"><h4>只换 · 插件</h4><p class="dim mono">tools / skills / prompts / seed</p><p class="dim">搜推标签 → 金融 / 生物 / 运维 任意内部业务</p></div>
+    </div>
+    <p class="lede mt-l">harness 的能力来自<b>骨架</b>,领域只是<b>插件</b>。</p>
+  </section>
+
+  <!-- 11 · Deploy / reproduce -->
+  <section class="slide" data-title="Deploy">
+    <p class="kicker">Reproduce</p>
+    <h2 class="h2">一条命令起全栈 · GitHub 可复刻</h2>
+    <div class="card mt-l">
+      <pre class="mono" style="margin:0;font-size:15px;line-height:1.9"><span class="dim">git clone https://github.com/IanLiYi1996/algoops-demo</span>
+cd algoops-demo/source/infrastructure
+npm install && npx cdk deploy --all   <span class="dim"># Runtime+Memory+CI+Cognito+API GW</span>
+./scripts/demo.sh                     <span class="dim"># 或 CLI 旁路复刻演示</span></pre>
+    </div>
+    <p class="tc mt-m">
+      <span class="svc-pill">Strands Agents SDK</span>
+      <span class="svc-pill">TypeScript CDK</span>
+      <span class="svc-pill">18 py + 6 cdk tests ✓</span>
+    </p>
+  </section>
+
+  <!-- 12 · Takeaway -->
+  <section class="slide center tc" data-title="Takeaway">
+    <div>
+      <p class="kicker">Takeaway</p>
+      <h1 class="h1 anim-rise-in" data-anim="rise-in">别信宣称 —— <span class="accent">真跑一遍</span></h1>
+      <p class="lede" style="margin:16px auto">AlgoOps · 算法效能智能体 · Amazon Bedrock AgentCore</p>
+      <p class="dim mono">github.com/IanLiYi1996/algoops-demo</p>
+    </div>
+  </section>
+
+</div>
+<script src="./assets/runtime.js"></script>
+</body></html>

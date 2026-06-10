@@ -24,7 +24,7 @@
 > **Strands Agents SDK** — *let AI verify AI* for internal model selection.
 
 <div align="center">
-  <img src="./docs/architecture.png" alt="AlgoOps architecture" width="860" />
+  <img src="./slides/diagrams/fig-four-stages.svg" alt="AlgoOps 四阶段:调研→评估→验证→沉淀" width="880" />
 </div>
 
 ## ✨ 四阶段 · The four stages
@@ -57,6 +57,20 @@ API Gateway HTTP API ──▶ relay Lambda  (校验 Cognito JWT, 再 invoke_age
 一个 TypeScript CDK app 起全栈:**AgentStack**(Runtime + Memory + Code Interpreter)
 + **WebAppStack**(CloudFront + Cognito + API Gateway + relay Lambda)。
 
+<div align="center">
+  <img src="./slides/diagrams/fig-architecture.svg" alt="browser → API Gateway → relay → AgentCore Runtime" width="880" />
+</div>
+
+## 🎞 分享 deck · Slides
+
+12 页 HTML 分享 deck(精简 booth 版)+ 中文逐字稿 + 4 张 SVG 流程图,视觉对齐 `DESIGN.md`。
+
+```bash
+open slides/slides.html      # ← → 翻页 · S 演讲者视图 · T 切主题
+```
+
+详见 [`slides/README.md`](./slides/README.md)。SVG 在 [`slides/diagrams/`](./slides/diagrams/),独立可编辑、零依赖。
+
 ## 📁 仓库结构 · Layout
 
 ```
@@ -67,7 +81,8 @@ algoops-demo/
 │   ├── infrastructure/   # TypeScript CDK(agent-stack · webapp-stack · relay lambda)
 │   └── web/              # 前端控制台(登录门 + 三块实时仪表盘)
 ├── scripts/              # demo.sh · seed.sh · smoke.sh(CLI 旁路, 复刻演示)
-└── docs/                 # 架构图 · Summit 提名材料
+├── slides/               # 12 页 HTML 分享 deck + 4 张 SVG 流程图(diagrams/)
+└── docs/                 # 架构图源文件 · Summit 提名材料
 ```
 
 ## 🚀 快速开始 · Quick start

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#0052ff"/>
+    </marker>
+    <style>
+      .stage{fill:#ffffff;stroke:#dee1e6;stroke-width:1.5;rx:16}
+      .num{fill:#a8acb3;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600}
+      .zh{fill:#0a0b0d;font-size:19px;font-weight:600}
+      .en{fill:#7c828a;font-size:12.5px;letter-spacing:.04em}
+      .svc{fill:#0052ff;font-size:12px;font-weight:600}
+      .desc{fill:#5b616e;font-size:12px}
+    </style>
+  </defs>
+
+  <text x="36" y="40" fill="#0a0b0d" font-size="20" font-weight="700">AlgoOps · 四阶段协同</text>
+  <text x="36" y="62" class="en" font-size="13">调研 → 评估 → 验证 → 沉淀　·　“AI verifies AI” for model selection</text>
+
+  <!-- 4 stage cards -->
+  <g>
+    <rect x="36"  y="96" width="196" height="150" rx="16" fill="#ffffff" stroke="#dee1e6" stroke-width="1.5"/>
+    <text x="54" y="124" class="num">01</text>
+    <text x="54" y="150" class="zh">调研</text>
+    <text x="54" y="170" class="en">Survey</text>
+    <text x="54" y="200" class="svc">Runtime</text>
+    <text x="54" y="222" class="desc">取候选模型的宣称指标</text>
+    <text x="54" y="238" class="desc">/ 数据集 / 适用场景</text>
+  </g>
+  <g>
+    <rect x="262" y="96" width="196" height="150" rx="16" fill="#ffffff" stroke="#dee1e6" stroke-width="1.5"/>
+    <text x="280" y="124" class="num">02</text>
+    <text x="280" y="150" class="zh">评估</text>
+    <text x="280" y="170" class="en">Assess</text>
+    <text x="280" y="200" class="svc">Skills</text>
+    <text x="280" y="222" class="desc">产出结构化评估卡,</text>
+    <text x="280" y="238" class="desc">标出风险与待验证项</text>
+  </g>
+  <g>
+    <rect x="488" y="96" width="196" height="150" rx="16" fill="#ffffff" stroke="#0052ff" stroke-width="2"/>
+    <text x="506" y="124" class="num">03</text>
+    <text x="506" y="150" class="zh">验证</text>
+    <text x="506" y="170" class="en">Verify</text>
+    <text x="506" y="200" class="svc">Code Interpreter</text>
+    <text x="506" y="222" class="desc">沙箱真跑 Recall@K /</text>
+    <text x="506" y="238" class="desc">NDCG@K / F1,对比宣称</text>
+  </g>
+  <g>
+    <rect x="714" y="96" width="210" height="150" rx="16" fill="#ffffff" stroke="#dee1e6" stroke-width="1.5"/>
+    <text x="732" y="124" class="num">04</text>
+    <text x="732" y="150" class="zh">沉淀</text>
+    <text x="732" y="170" class="en">Persist</text>
+    <text x="732" y="200" class="svc">Memory</text>
+    <text x="732" y="222" class="desc">历次选型结论跨会话</text>
+    <text x="732" y="238" class="desc">召回,不重复踩坑</text>
+  </g>
+
+  <!-- arrows between cards -->
+  <line x1="232" y1="171" x2="260" y2="171" stroke="#0052ff" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="458" y1="171" x2="486" y2="171" stroke="#0052ff" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="684" y1="171" x2="712" y2="171" stroke="#0052ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- feedback loop: Persist → Survey -->
+  <path d="M819 246 C819 285, 134 285, 134 250" fill="none" stroke="#a8acb3" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <text x="430" y="283" fill="#7c828a" font-size="11.5" font-style="italic">下次评估先召回历史结论 · recall before re-evaluating</text>
+</svg>

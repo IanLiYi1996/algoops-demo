@@ -1,0 +1,24 @@
+/* theme: algoops — Coinbase-institutional (matches the demo's DESIGN.md) */
+:root{
+  --bg:#ffffff;--bg-soft:#f7f7f7;--surface:#ffffff;--surface-2:#eef0f3;
+  --border:#dee1e6;--border-strong:#c8ccd2;
+  --text-1:#0a0b0d;--text-2:#5b616e;--text-3:#7c828a;
+  --accent:#0052ff;--accent-2:#0052ff;--accent-3:#8b7bff;
+  --good:#05b169;--warn:#f4b000;--bad:#cf202f;
+  --grad:linear-gradient(135deg,#0052ff,#003ecc);
+  --grad-soft:linear-gradient(135deg,#eef2ff,#f7f7f7);
+  --radius:16px;--radius-sm:8px;--radius-lg:24px;
+  --shadow:0 4px 12px rgba(0,0,0,.04);
+  --shadow-lg:0 12px 32px rgba(0,0,0,.08);
+  --font-sans:'Inter','Noto Sans SC',-apple-system,system-ui,sans-serif;
+  --font-display:'Inter','Noto Sans SC',-apple-system,system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  --letter-tight:-0.015em;
+}
+.card{border:1px solid var(--border);box-shadow:none}
+.divider-accent{background:var(--accent);height:3px;width:56px}
+.kicker{color:var(--accent);font-weight:600;letter-spacing:.04em}
+h1.title,h2.title,.h1,.h2{font-weight:700;color:var(--text-1);letter-spacing:var(--letter-tight)}
+/* scarce-blue rule: blue is for emphasis/accents only */
+.accent{color:var(--accent)}
+.mono{font-family:var(--font-mono)}
