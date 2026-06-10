@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AlgoOps · 算法效能智能体 — Amazon Bedrock AgentCore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Coinbase-style institutional palette (see DESIGN.md) */
+    --primary: #0052ff;
+    --primary-active: #003ecc;
+    --primary-disabled: #a8b8cc;
+    --ink: #0a0b0d;
+    --body: #5b616e;
+    --muted: #7c828a;
+    --muted-soft: #a8acb3;
+    --hairline: #dee1e6;
+    --hairline-soft: #eef0f3;
+    --canvas: #ffffff;
+    --surface-soft: #f7f7f7;
+    --surface-strong: #eef0f3;
+    --surface-dark: #0a0b0d;
+    --surface-dark-elev: #16181c;
+    --on-primary: #ffffff;
+    --on-dark: #ffffff;
+    --on-dark-soft: #a8acb3;
+    --up: #05b169;
+    --down: #cf202f;
+
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 24px;
+    --r-pill: 100px;
+    --shadow: 0 4px 12px rgba(0,0,0,.04);
+    --shadow-lift: 0 12px 32px rgba(0,0,0,.08);
+
+    --display: 'Inter', -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --sans: 'Inter', -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* CoinbaseDisplay → Inter 400 with negative tracking */
+  .display { font-family: var(--display); font-weight: 400; letter-spacing: -0.015em; line-height: 1.04; }
+  .mono { font-family: var(--mono); }
+
+  button { font-family: var(--sans); cursor: pointer; }
+  .pill {
+    border-radius: var(--r-pill); border: none; font-weight: 600; font-size: 16px;
+    padding: 12px 20px; height: 44px; transition: background .15s ease, transform .1s ease, box-shadow .2s ease;
+  }
+  .pill-primary { background: var(--primary); color: var(--on-primary); }
+  .pill-primary:hover { background: var(--primary-active); }
+  .pill-primary:active { transform: translateY(1px); }
+  .pill-primary:disabled { background: var(--primary-disabled); cursor: not-allowed; }
+  .pill-cta { height: 56px; padding: 16px 32px; font-size: 16px; }
+  .pill-ghost-dark { background: transparent; color: var(--on-dark); border: 1px solid rgba(255,255,255,.4); }
+  .pill-ghost-dark:hover { background: rgba(255,255,255,.08); }
+  .badge {
+    display: inline-block; background: var(--surface-strong); color: var(--ink);
+    font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    border-radius: var(--r-pill); padding: 4px 12px;
+  }
+  .badge-on-dark { background: rgba(255,255,255,.1); color: var(--on-dark); }
+
+  /* ───────── Login gate: full-bleed dark editorial hero ───────── */
+  #gate {
+    position: fixed; inset: 0; z-index: 40;
+    background: var(--surface-dark); color: var(--on-dark);
+    display: grid; grid-template-columns: 1.05fr 0.95fr; align-items: center;
+  }
+  .gate-left { padding: 0 clamp(40px, 7vw, 110px); }
+  .gate-kicker { color: var(--on-dark-soft); font-size: 14px; font-weight: 500; letter-spacing: .02em; margin-bottom: 22px; }
+  .gate-kicker .dot { color: var(--primary); }
+  .gate-title { font-size: clamp(48px, 6.5vw, 80px); margin: 0 0 22px; }
+  .gate-sub { color: var(--on-dark-soft); font-size: 18px; line-height: 1.5; max-width: 30em; margin-bottom: 38px; }
+  .gate-sub b { color: var(--on-dark); font-weight: 600; }
+  .gate-actions { display: flex; gap: 14px; align-items: center; }
+  .gate-foot { margin-top: 34px; color: var(--muted); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; }
+
+  /* Floating product-UI mockup card stack (the signature pattern) */
+  .gate-right { position: relative; height: 100%; overflow: hidden; }
+  .mock {
+    position: absolute; background: var(--surface-dark-elev); border-radius: var(--r-xl);
+    padding: 24px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.06);
+  }
+  .mock-a { top: 16%; left: 6%; width: 60%; transform: rotate(-3deg); }
+  .mock-b { top: 40%; right: 6%; width: 56%; transform: rotate(2.5deg); }
+  .mock h4 { margin: 0 0 14px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--on-dark-soft); font-weight: 600; }
+  .mock .num { font-family: var(--mono); font-weight: 500; font-size: 26px; color: var(--on-dark); }
+  .mock .num.up { color: var(--up); }
+  .mock .line { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); margin: 9px 0; }
+  .mock .line.s { width: 62%; } .mock .line.m { width: 84%; }
+  .mock .chip { display:inline-block; font-family: var(--mono); font-size: 11px; color: var(--primary);
+    background: rgba(0,82,255,.14); border-radius: var(--r-pill); padding: 3px 10px; margin-top: 6px; }
+
+  /* ───────── App shell (white institutional) ───────── */
+  #app { display: none; height: 100vh; grid-template-rows: auto 1fr; }
+  #app.live { display: grid; }
+
+  header {
+    display: flex; align-items: center; gap: 16px; height: 64px; padding: 0 24px;
+    background: var(--canvas); border-bottom: 1px solid var(--hairline);
+  }
+  .brand { font-family: var(--display); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; }
+  .brand .dot { color: var(--primary); }
+  .brand small { display: block; font-size: 11px; font-weight: 500; letter-spacing: .04em; color: var(--muted); margin-top: 1px; }
+  .svc-tags { display: flex; gap: 8px; margin-left: 8px; }
+  .spacer { flex: 1; }
+  .status { display: flex; align-items: center; gap: 8px; color: var(--body); font-size: 14px; font-weight: 500; }
+  .status .led { width: 8px; height: 8px; border-radius: 50%; background: var(--up); }
+  .status .led.busy { background: var(--accent, #f4b000); animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  .who { color: var(--muted); font-size: 14px; }
+  .who b { color: var(--ink); font-weight: 600; }
+  .logout { background: var(--surface-strong); color: var(--ink); border: none; border-radius: var(--r-pill);
+    font-size: 14px; font-weight: 600; padding: 8px 16px; }
+  .logout:hover { background: var(--hairline); }
+
+  main { display: grid; grid-template-columns: minmax(380px, 1fr) 1.25fr; min-height: 0; }
+
+  /* Console (left) */
+  .console { border-right: 1px solid var(--hairline); display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
+  .console-head { padding: 18px 24px 12px; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .transcript { overflow-y: auto; padding: 8px 24px 20px; display: flex; flex-direction: column; gap: 18px; }
+  .msg .role { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .msg.user { align-self: flex-end; max-width: 88%; text-align: right; }
+  .msg.user .role { color: var(--primary); }
+  .msg.agent { align-self: flex-start; max-width: 92%; }
+  .bubble {
+    font-size: 15px; line-height: 1.6; padding: 14px 18px; border-radius: var(--r-lg);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .msg.user .bubble { background: var(--primary); color: var(--on-primary); border-bottom-right-radius: 4px; }
+  .msg.agent .bubble { background: var(--surface-soft); color: var(--ink); border: 1px solid var(--hairline-soft); border-bottom-left-radius: 4px; }
+  .bubble.cursor::after { content: '▋'; color: var(--primary); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .composer { padding: 16px 24px 20px; border-top: 1px solid var(--hairline); background: var(--canvas); }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .preset { background: var(--surface-strong); color: var(--ink); border: none; border-radius: var(--r-pill);
+    font-size: 13px; font-weight: 500; padding: 6px 14px; cursor: pointer; }
+  .preset:hover { background: var(--hairline); }
+  .input-row { display: flex; gap: 10px; }
+  .input-row textarea {
+    flex: 1; resize: none; height: 52px; border: 1px solid var(--hairline); border-radius: var(--r-md);
+    padding: 14px 16px; font-family: var(--sans); font-size: 15px; color: var(--ink); line-height: 1.4;
+  }
+  .input-row textarea:focus { outline: none; border: 2px solid var(--primary); padding: 13px 15px; }
+  .session-line { margin-top: 12px; font-size: 13px; color: var(--muted); display: flex; gap: 14px; align-items: center; }
+  .session-line input { border: none; border-bottom: 1px solid var(--hairline); color: var(--primary);
+    font-family: var(--mono); font-size: 12px; width: 150px; padding: 2px 0; }
+  .session-line input:focus { outline: none; border-bottom-color: var(--primary); }
+  .newsess { color: var(--primary); font-weight: 600; cursor: pointer; }
+
+  /* Instrument cards (right) */
+  .panels { background: var(--surface-soft); padding: 24px; display: grid; grid-template-rows: repeat(3, 1fr); gap: 16px; min-height: 0; overflow-y: auto; }
+  .tile {
+    background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--r-xl);
+    padding: 22px 24px; display: grid; grid-template-rows: auto 1fr; min-height: 0;
+    transition: box-shadow .25s ease, border-color .25s ease;
+  }
+  .tile.hot { box-shadow: var(--shadow-lift); border-color: var(--primary); }
+  .tile-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .tile-idx { font-family: var(--mono); font-size: 12px; color: var(--muted-soft); }
+  .tile-name { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  .tile-led { margin-left: auto; font-size: 11px; font-weight: 600; letter-spacing: .08em;
+    color: var(--muted); background: var(--surface-strong); border-radius: var(--r-pill); padding: 4px 12px; }
+  .tile.hot .tile-led { color: var(--on-primary); background: var(--primary); }
+  .tile-body { overflow-y: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.65; color: var(--body); white-space: pre-wrap; word-break: break-word; }
+  .tile-body:empty::before { content: '— awaiting telemetry —'; color: var(--muted-soft); font-style: italic; }
+  .skill-chip { display: inline-block; color: var(--primary); background: rgba(0,82,255,.1);
+    border-radius: var(--r-pill); padding: 2px 10px; margin: 2px 4px 2px 0; font-size: 11px; font-weight: 600; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 100px; border: 3px solid var(--canvas); }
+  .panels::-webkit-scrollbar-thumb { border-color: var(--surface-soft); }
+
+  .boot { animation: boot .4s ease both; }
+  @keyframes boot { from { opacity: 0; transform: translateY(6px); } }
+
+  @media (max-width: 900px) {
+    #gate { grid-template-columns: 1fr; } .gate-right { display: none; }
+    main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    .panels { grid-template-rows: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- LOGIN GATE — dark editorial hero with floating product-UI cards -->
+  <div id="gate">
+    <div class="gate-left boot">
+      <div class="gate-kicker">Amazon Bedrock AgentCore<span class="dot"> ●</span> Builder Demo</div>
+      <h1 class="display gate-title">AlgoOps<br>算法效能智能体</h1>
+      <p class="gate-sub">让 Agent 以「<b>AI 验证 AI</b>」替团队做模型选型 ——
+        <b>调研</b> 候选模型、产出 <b>评估卡</b>、在沙箱里 <b>真跑 benchmark</b>
+        验证宣称指标，根治"离线漂亮、上线翻车"。</p>
+      <div class="gate-actions">
+        <button class="pill pill-primary pill-cta" id="login">Authorize console</button>
+        <span class="badge badge-on-dark">Cognito secured</span>
+      </div>
+      <div class="gate-foot" id="gate-state">AUTH: REQUIRED · JWT</div>
+    </div>
+    <div class="gate-right" aria-hidden="true">
+      <div class="mock mock-a">
+        <h4>Evaluation card · BGE-M3</h4>
+        <div class="num">claimed R@10 0.82</div>
+        <div class="line m"></div><div class="line s"></div>
+        <span class="chip">search · 检索选型</span>
+      </div>
+      <div class="mock mock-b">
+        <h4>Sandbox · verify</h4>
+        <div class="num up">verified R@10 0.79</div>
+        <div class="line m"></div><div class="line m"></div><div class="line s"></div>
+        <span class="chip">Recall@K · NDCG · F1 ✓</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app">
+    <header>
+      <div class="brand">AlgoOps<span class="dot">·</span>算法效能智能体
+        <small>AGENTCORE · AI VERIFIES AI</small></div>
+      <div class="svc-tags">
+        <span class="badge">Runtime</span>
+        <span class="badge">Memory</span>
+        <span class="badge">Code Interp</span>
+      </div>
+      <div class="spacer"></div>
+      <div class="status"><span class="led" id="led"></span><span id="conn">LINK ACTIVE</span></div>
+      <div class="who" id="who"></div>
+      <button class="logout" id="logout">Sign out</button>
+    </header>
+
+    <main>
+      <section class="console">
+        <div class="console-head">Agent console</div>
+        <div class="transcript" id="transcript"></div>
+        <div class="composer">
+          <div class="presets" id="presets">
+            <button class="preset" data-q="Evaluate candidate model bge-m3: produce its evaluation card and store the conclusion.">评估 BGE-M3</button>
+            <button class="preset" data-q="Based on your memory, which models have we already evaluated for search/rec/tagging? Be specific.">召回选型结论</button>
+            <button class="preset" data-q="Verify bge-m3's claimed Recall@10 by running a benchmark in the code interpreter and show the actual numbers.">真跑验证</button>
+          </div>
+          <div class="input-row">
+            <textarea id="prompt" placeholder="给 AlgoOps 下指令：评估某个候选模型 / 召回选型结论 / 真跑验证宣称指标…"></textarea>
+            <button class="pill pill-primary" id="run" style="width:104px">Run</button>
+          </div>
+          <div class="session-line">
+            <span>SESSION</span>
+            <input id="session" value="booth-1" />
+            <span class="newsess" id="newsess">⟳ new session (test recall)</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panels">
+        <div class="tile" id="tile-pipeline">
+          <div class="tile-head"><span class="tile-idx">01</span><span class="tile-name">Pipeline</span><span class="tile-led">IDLE</span></div>
+          <div class="tile-body" id="pipeline"></div>
+        </div>
+        <div class="tile" id="tile-memory">
+          <div class="tile-head"><span class="tile-idx">02</span><span class="tile-name">Memory</span><span class="tile-led">IDLE</span></div>
+          <div class="tile-body" id="memory"></div>
+        </div>
+        <div class="tile" id="tile-sandbox">
+          <div class="tile-head"><span class="tile-idx">03</span><span class="tile-name">Sandbox</span><span class="tile-led">IDLE</span></div>
+          <div class="tile-body" id="sandbox"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

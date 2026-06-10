@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# Node / CDK
+node_modules/
+cdk.out/
+*.js.map
+source/infrastructure/lib/**/*.js
+source/infrastructure/bin/**/*.js
+# Local config (config.json is injected at deploy time by the web stack)
+source/web/config.json
+source/web/config.local.json
+source/web/preview.html
+.env
